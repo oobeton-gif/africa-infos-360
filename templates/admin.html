@@ -1,1 +1,61 @@
-{% extends "base.html" %}{% block content %}<section class="staticpage"><div class="adminhead"><div><span class="eyebrow">ESPACE PRIVÉ</span><h1>Tableau de bord</h1></div><a href="{{url_for('logout')}}">Déconnexion</a></div><a class="btn" href="{{url_for('edit_article')}}">+ Nouvel article</a><h2>Articles</h2><div class="tablewrap"><table><tr><th>Titre</th><th>Catégorie</th><th>État</th><th>Actions</th></tr>{% for a in articles %}<tr><td>{{a.title}}</td><td>{{a.category}}</td><td>{{'Publié' if a.published else 'Brouillon'}}</td><td><a href="{{url_for('edit_article',article_id=a.id)}}">Modifier</a> · <a href="{{url_for('article',slug=a.slug)}}">Voir</a> · <form class="inline" method="post" action="{{url_for('delete_article',article_id=a.id)}}" onsubmit="return confirm('Supprimer cet article ?')"><button class="textbutton">Supprimer</button></form></td></tr>{% endfor %}</table></div><h2>Derniers messages</h2>{% for m in messages %}<div class="message"><b>{{m.name}}</b> · {{m.email}}<p>{{m.message}}</p></div>{% else %}<p>Aucun message.</p>{% endfor %}</section>{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+<section class="staticpage">
+
+    <div class="adminhead">
+        <div>
+            <span class="eyebrow">ESPACE PRIVÉ</span>
+            <h1>Tableau de bord</h1>
+        </div>
+        <a href="{{ url_for('logout') }}">Déconnexion</a>
+    </div>
+
+    <a class="btn" href="{{ url_for('edit_article') }}">+ Nouvel article</a>
+
+    <a class="btn" href="{{ url_for('statistiques') }}">📊 Statistiques du site</a>
+
+    <h2>Articles</h2>
+
+    <div class="tablewrap">
+        <table>
+            <tr>
+                <th>Titre</th>
+                <th>Catégorie</th>
+                <th>État</th>
+                <th>Actions</th>
+            </tr>
+
+            {% for a in articles %}
+            <tr>
+                <td>{{ a.title }}</td>
+                <td>{{ a.category }}</td>
+                <td>{{ 'Publié' if a.published else 'Brouillon' }}</td>
+                <td>
+                    <a href="{{ url_for('edit_article', article_id=a.id) }}">Modifier</a> ·
+                    <a href="{{ url_for('article', slug=a.slug) }}">Voir</a> ·
+
+                    <form class="inline" method="post"
+                          action="{{ url_for('delete_article', article_id=a.id) }}"
+                          onsubmit="return confirm('Supprimer cet article ?')">
+                        <button class="textbutton">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <h2>Derniers messages</h2>
+
+    {% for m in messages %}
+    <div class="message">
+        <b>{{ m.name }}</b> · {{ m.email }}
+        <p>{{ m.message }}</p>
+    </div>
+    {% else %}
+    <p>Aucun message.</p>
+    {% endfor %}
+
+</section>
+{% endblock %}
