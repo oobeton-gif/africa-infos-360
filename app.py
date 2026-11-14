@@ -383,6 +383,65 @@ def dashboard():
         articles=articles,
         messages=messages
     )
+with db() as con:
+
+    # VISITES DU JOUR
+    today = con.execute("""
+        SELECT
+            COUNT(*) AS visites,
+            COUNT(DISTINCT visitor_id) AS visiteurs
+        FROM site_visits
+        WHERE visited_at::date = CURRENT_DATE
+    """).fetchone()
+
+    # VISITES DU MOIS
+    month = con.execute("""
+        SELECT
+            COUNT(*) AS visites,
+            COUNT(DISTINCT visitor_id) AS visiteurs
+        FROM site_visits
+        WHERE visited_at >= DATE_TRUNC('month', CURRENT_DATE)
+    """).fetchone()
+
+    # TOTAL DES VISITES
+    total = con.execute("""
+        SELECT
+            COUNT(*) AS visites,
+            COUNT(DISTINCT visitor_id) AS visiteurs
+        FROM site_visits
+    """).fetchone()
+
+    # PAGES LES PLUS CONSULTEES
+    top_pages = con.execute("""
+        SELECT
+            path,
+            COUNT(*) AS visites
+        FROM site_visits
+        GROUP BY path
+        ORDER BY visites DESC
+        LIMIT 10
+    """).fetchall()
+
+    # FREQUENTATION DES 7 DERNIERS JOURS
+    daily_stats = con.execute("""
+        SELECT
+            visited_at::date AS jour,
+            COUNT(*) AS visites,
+            COUNT(DISTINCT visitor_id) AS visiteurs
+        FROM site_visits
+        WHERE visited_at >= CURRENT_DATE - INTERVAL '6 days'
+        GROUP BY visited_at::date
+        ORDER BY jour
+    """).fetchall()
+
+return render_template(
+    "statistiques.html",
+    today=today,
+    month=month,
+    total=total,
+    top_pages=top_pages,
+    daily_stats=daily_stats
+)
 
 
 # =====================================
