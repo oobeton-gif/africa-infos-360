@@ -479,14 +479,70 @@ def delete_article(article_id):
     flash("Article supprimé.")
 
     return redirect(url_for("dashboard"))
+# ==========================================
+# STATISTIQUES DE FREQUENTATION
+# AFRICA INFOS 360
+# ==========================================
 
+def init_analytics_db():
+    with db() as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS site_visits (
+                id BIGSERIAL PRIMARY KEY,
+                visitor_id VARCHAR(100) NOT NULL,
+                path TEXT NOT NULL,
+                visited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        con.execute("""
+            CREATE INDEX IF NOT EXISTS idx_site_visits_date
+            ON site_visits (visited_at)
+        """)
+
+
+@application.before_request
+def track_public_visits():
+
+    if request.method != "GET":
+        return
+
+    if request.endpoint == "static":
+        return
+
+    if request.path.startswith("/admin"):
+        return
+
+    if request.path in ["/favicon.ico", "/robots.txt"]:
+        return
+
+    visitor_id = session.get("analytics_visitor_id")
+
+    if not visitor_id:
+        visitor_id = secrets.token_urlsafe(16)
+        session["analytics_visitor_id"] = visitor_id
+
+    try:
+        with db() as con:
+            con.execute(
+                """
+                INSERT INTO site_visits (visitor_id, path)
+                VALUES (%s, %s)
+                """,
+                (visitor_id, request.path)
+            )
+
+    except Exception:
+        application.logger.exception(
+            "Erreur de suivi des visiteurs"
+        )
 
 # =====================================
 # DEMARRAGE
 # =====================================
 
 init_db()
-
+init_analytics_db()
 
 if __name__ == "__main__":
     app.run(debug=False)
