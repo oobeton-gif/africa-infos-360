@@ -465,9 +465,42 @@ def statistiques():
               AND country_name <> 'Non déterminé'
               AND visited_at >= CURRENT_DATE - INTERVAL '29 days'
             GROUP BY country_name, country_code
-            ORDER BY visites DESC
+            ORDER BY CASE WHEN country_code = 'CI' THEN 0 ELSE 1 END,
+                     visites DESC
             LIMIT 10
         """).fetchall()
+
+        # COMPARAISON DES 30 DERNIERS JOURS AVEC LES 30 JOURS PRECEDENTS
+        previous_30_days = con.execute("""
+            SELECT COUNT(*) AS visites,
+                   COUNT(DISTINCT visitor_id) AS visiteurs
+            FROM site_visits
+            WHERE visited_at >= CURRENT_DATE - INTERVAL '59 days'
+              AND visited_at < CURRENT_DATE - INTERVAL '29 days'
+        """).fetchone()
+
+        current_30_days = con.execute("""
+            SELECT COUNT(*) AS visites,
+                   COUNT(DISTINCT visitor_id) AS visiteurs
+            FROM site_visits
+            WHERE visited_at >= CURRENT_DATE - INTERVAL '29 days'
+        """).fetchone()
+
+    def variation(current, previous):
+        current = int(current or 0)
+        previous = int(previous or 0)
+        if previous == 0:
+            return 100 if current > 0 else 0
+        return round(((current - previous) / previous) * 100, 1)
+
+    comparison = {
+        "visites_actuelles": current_30_days["visites"],
+        "visites_precedentes": previous_30_days["visites"],
+        "visites_variation": variation(current_30_days["visites"], previous_30_days["visites"]),
+        "visiteurs_actuels": current_30_days["visiteurs"],
+        "visiteurs_precedents": previous_30_days["visiteurs"],
+        "visiteurs_variation": variation(current_30_days["visiteurs"], previous_30_days["visiteurs"])
+    }
 
     return render_template(
         "statistiques.html",
@@ -478,7 +511,8 @@ def statistiques():
         top_pages=top_pages,
         daily_stats=daily_stats,
         top_articles=top_articles,
-        countries=countries
+        countries=countries,
+        comparison=comparison
     )
 
 
