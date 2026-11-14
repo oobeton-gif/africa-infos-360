@@ -388,6 +388,7 @@ def dashboard():
 @admin_required
 def statistiques():
     with db() as con:
+        # INDICATEURS DU JOUR
         today = con.execute("""
             SELECT COUNT(*) AS visites,
                    COUNT(DISTINCT visitor_id) AS visiteurs
@@ -395,6 +396,7 @@ def statistiques():
             WHERE visited_at::date = CURRENT_DATE
         """).fetchone()
 
+        # INDICATEURS DU MOIS EN COURS
         month = con.execute("""
             SELECT COUNT(*) AS visites,
                    COUNT(DISTINCT visitor_id) AS visiteurs
@@ -402,12 +404,22 @@ def statistiques():
             WHERE visited_at >= DATE_TRUNC('month', CURRENT_DATE)
         """).fetchone()
 
+        # INDICATEURS SUR LES 30 DERNIERS JOURS
+        last_30_days = con.execute("""
+            SELECT COUNT(*) AS visites,
+                   COUNT(DISTINCT visitor_id) AS visiteurs
+            FROM site_visits
+            WHERE visited_at >= CURRENT_DATE - INTERVAL '29 days'
+        """).fetchone()
+
+        # TOTAL DEPUIS LA MISE EN PLACE DU SUIVI
         total = con.execute("""
             SELECT COUNT(*) AS visites,
                    COUNT(DISTINCT visitor_id) AS visiteurs
             FROM site_visits
         """).fetchone()
 
+        # PAGES LES PLUS CONSULTEES
         top_pages = con.execute("""
             SELECT path, COUNT(*) AS visites
             FROM site_visits
@@ -416,23 +428,39 @@ def statistiques():
             LIMIT 10
         """).fetchall()
 
+        # FREQUENTATION QUOTIDIENNE DES 30 DERNIERS JOURS
         daily_stats = con.execute("""
             SELECT TO_CHAR(visited_at::date, 'YYYY-MM-DD') AS jour,
                    COUNT(*) AS visites,
                    COUNT(DISTINCT visitor_id) AS visiteurs
             FROM site_visits
-            WHERE visited_at >= CURRENT_DATE - INTERVAL '6 days'
+            WHERE visited_at >= CURRENT_DATE - INTERVAL '29 days'
             GROUP BY visited_at::date
             ORDER BY visited_at::date
+        """).fetchall()
+
+        # ARTICLES LES PLUS LUS
+        top_articles = con.execute("""
+            SELECT a.title, a.slug, COUNT(v.id) AS visites
+            FROM articles AS a
+            JOIN site_visits AS v
+              ON v.path = '/article/' || a.slug
+            WHERE a.published = 1
+              AND v.visited_at >= CURRENT_DATE - INTERVAL '29 days'
+            GROUP BY a.id, a.title, a.slug
+            ORDER BY visites DESC
+            LIMIT 10
         """).fetchall()
 
     return render_template(
         "statistiques.html",
         today=today,
         month=month,
+        last_30_days=last_30_days,
         total=total,
         top_pages=top_pages,
-        daily_stats=daily_stats
+        daily_stats=daily_stats,
+        top_articles=top_articles
     )
 
 
