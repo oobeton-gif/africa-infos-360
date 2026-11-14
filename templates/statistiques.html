@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Statistiques - AFRICA INFOS 360</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+    background: #f4f6fa;
+    color: #14243a;
+}
+
+.container {
+    max-width: 1250px;
+    margin: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.header h1 {
+    font-size: 30px;
+}
+
+.header a {
+    background: #f5b942;
+    padding: 12px 20px;
+    border-radius: 7px;
+    color: #14243a;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px #00000008;
+}
+
+.card h3 {
+    color: #718096;
+    font-size: 14px;
+}
+
+.card .number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #102d50;
+}
+
+.panel {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 12px #00000008;
+}
+
+.panel h2 {
+    margin-top: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #edf0f4;
+}
+
+th {
+    background: #f4f6fa;
+}
+
+@media(max-width: 850px) {
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width: 500px) {
+    body {
+        padding: 15px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+    <div>
+        <h1>📊 Statistiques</h1>
+        <p>AFRICA INFOS 360 — Tableau de bord analytique</p>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}">
+        ← Retour administration
+    </a>
+</div>
+
+<div class="cards">
+
+    <div class="card">
+        <h3>VISITES AUJOURD'HUI</h3>
+        <div class="number">{{ today.visites }}</div>
+    </div>
+
+    <div class="card">
+        <h3>VISITEURS AUJOURD'HUI</h3>
+        <div class="number">{{ today.visiteurs }}</div>
+    </div>
+
+    <div class="card">
+        <h3>VISITES DU MOIS</h3>
+        <div class="number">{{ month.visites }}</div>
+    </div>
+
+    <div class="card">
+        <h3>VISITES TOTALES</h3>
+        <div class="number">{{ total.visites }}</div>
+    </div>
+
+</div>
+
+<div class="panel">
+    <h2>📈 Fréquentation des 7 derniers jours</h2>
+    <canvas id="trafficChart" height="100"></canvas>
+</div>
+
+<div class="panel">
+
+    <h2>🏆 Pages les plus consultées</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Page</th>
+                <th>Nombre de visites</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for page in top_pages %}
+            <tr>
+                <td>{{ page.path }}</td>
+                <td>{{ page.visites }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="2">Aucune visite enregistrée.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</div>
+
+<script>
+
+const labels = {{ daily_stats | map(attribute='jour') | list | tojson }};
+
+const visits = {{ daily_stats | map(attribute='visites') | list | tojson }};
+
+const visitors = {{ daily_stats | map(attribute='visiteurs') | list | tojson }};
+
+new Chart(document.getElementById('trafficChart'), {
+
+    type: 'line',
+
+    data: {
+        labels: labels,
+
+        datasets: [
+            {
+                label: 'Visites',
+                data: visits,
+                borderWidth: 3,
+                tension: 0.4
+            },
+            {
+                label: 'Visiteurs uniques',
+                data: visitors,
+                borderWidth: 3,
+                tension: 0.4
+            }
+        ]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+
+});
+
+</script>
+
+</body>
+</html>
