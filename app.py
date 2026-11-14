@@ -501,7 +501,7 @@ def init_analytics_db():
         """)
 
 
-@application.before_request
+@app.before_request
 def track_public_visits():
 
     if request.method != "GET":
@@ -533,9 +533,9 @@ def track_public_visits():
             )
 
     except Exception:
-        application.logger.exception(
-            "Erreur de suivi des visiteurs"
-        )
+      app.logger.exception(
+    "Erreur de suivi des visiteurs"
+)
 
 # =====================================
 # DEMARRAGE
