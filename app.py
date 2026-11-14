@@ -1,5 +1,9 @@
 import os
 import secrets
+import ipaddress
+import json
+from urllib.request import urlopen
+from urllib.error import URLError, HTTPError
 from datetime import datetime
 from functools import wraps
 
@@ -452,6 +456,19 @@ def statistiques():
             LIMIT 10
         """).fetchall()
 
+        # PROVENANCE GEOGRAPHIQUE (pays connus uniquement)
+        countries = con.execute("""
+            SELECT country_name, country_code, COUNT(*) AS visites,
+                   COUNT(DISTINCT visitor_id) AS visiteurs
+            FROM site_visits
+            WHERE country_name IS NOT NULL
+              AND country_name <> 'Non déterminé'
+              AND visited_at >= CURRENT_DATE - INTERVAL '29 days'
+            GROUP BY country_name, country_code
+            ORDER BY visites DESC
+            LIMIT 10
+        """).fetchall()
+
     return render_template(
         "statistiques.html",
         today=today,
@@ -460,7 +477,8 @@ def statistiques():
         total=total,
         top_pages=top_pages,
         daily_stats=daily_stats,
-        top_articles=top_articles
+        top_articles=top_articles,
+        countries=countries
     )
 
 
@@ -579,6 +597,91 @@ def init_analytics_db():
             ON site_visits (visited_at)
         """)
 
+        con.execute("""
+            ALTER TABLE site_visits
+            ADD COLUMN IF NOT EXISTS country_name TEXT
+        """)
+        con.execute("""
+            ALTER TABLE site_visits
+            ADD COLUMN IF NOT EXISTS country_code VARCHAR(2)
+        """)
+
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS visitor_geo (
+                visitor_id VARCHAR(100) PRIMARY KEY,
+                country_name TEXT,
+                country_code VARCHAR(2),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        con.execute("""
+            CREATE INDEX IF NOT EXISTS idx_site_visits_country
+            ON site_visits (country_code)
+        """)
+
+
+def get_visitor_country(visitor_id):
+    """Retourne le pays approximatif du visiteur sans conserver son adresse IP."""
+    try:
+        with db() as con:
+            cached = con.execute("""
+                SELECT country_name, country_code
+                FROM visitor_geo
+                WHERE visitor_id = %s
+                  AND updated_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
+            """, (visitor_id,)).fetchone()
+
+        if cached:
+            return cached["country_name"], cached["country_code"]
+
+        # Render transmet généralement l'adresse cliente dans X-Forwarded-For.
+        candidates = list(request.access_route)
+        if not candidates and request.remote_addr:
+            candidates = [request.remote_addr]
+
+        client_ip = None
+        for candidate in candidates:
+            try:
+                parsed_ip = ipaddress.ip_address(candidate.strip())
+                if parsed_ip.is_global:
+                    client_ip = str(parsed_ip)
+                    break
+            except ValueError:
+                continue
+
+        country_name = "Non déterminé"
+        country_code = None
+
+        if client_ip:
+            # Le fournisseur reçoit l'IP pour déterminer le pays.
+            # L'adresse IP brute n'est jamais enregistrée dans notre base.
+            api_url = "https://ipwho.is/" + client_ip
+            try:
+                with urlopen(api_url, timeout=2) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                if payload.get("success"):
+                    country_name = payload.get("country") or country_name
+                    country_code = payload.get("country_code")
+            except (URLError, HTTPError, TimeoutError, ValueError, json.JSONDecodeError):
+                app.logger.warning("Géolocalisation indisponible pour un visiteur.")
+
+        with db() as con:
+            con.execute("""
+                INSERT INTO visitor_geo
+                    (visitor_id, country_name, country_code, updated_at)
+                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (visitor_id) DO UPDATE SET
+                    country_name = EXCLUDED.country_name,
+                    country_code = EXCLUDED.country_code,
+                    updated_at = CURRENT_TIMESTAMP
+            """, (visitor_id, country_name, country_code))
+
+        return country_name, country_code
+
+    except Exception:
+        app.logger.exception("Erreur pendant la géolocalisation du visiteur.")
+        return None, None
+
 
 @app.before_request
 def track_public_visits():
@@ -601,14 +704,17 @@ def track_public_visits():
         visitor_id = secrets.token_urlsafe(16)
         session["analytics_visitor_id"] = visitor_id
 
+    country_name, country_code = get_visitor_country(visitor_id)
+
     try:
         with db() as con:
             con.execute(
                 """
-                INSERT INTO site_visits (visitor_id, path)
-                VALUES (%s, %s)
+                INSERT INTO site_visits
+                    (visitor_id, path, country_name, country_code)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (visitor_id, request.path)
+                (visitor_id, request.path, country_name, country_code)
             )
 
     except Exception:
