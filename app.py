@@ -434,14 +434,14 @@ with db() as con:
         ORDER BY jour
     """).fetchall()
 
-return render_template(
-    "statistiques.html",
-    today=today,
-    month=month,
-    total=total,
-    top_pages=top_pages,
-    daily_stats=daily_stats
-)
+    return render_template(
+        "statistiques.html",
+        today=today,
+        month=month,
+        total=total,
+        top_pages=top_pages,
+        daily_stats=daily_stats
+    )
 
 
 # =====================================
