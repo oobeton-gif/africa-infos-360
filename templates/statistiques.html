@@ -65,6 +65,26 @@ td a{color:#173c64;text-decoration:none}td a:hover{text-decoration:underline}.em
 {% else %}<p class="empty">Aucune visite enregistrée pour le moment.</p>{% endif %}
 </section>
 </div>
+
+<section class="panel">
+<h2>🌍 Provenance des lecteurs — 30 derniers jours</h2>
+{% if countries %}
+<table>
+<thead><tr><th>Pays</th><th>Visites</th><th>Navigateurs identifiés</th></tr></thead>
+<tbody>
+{% for country in countries %}
+<tr>
+<td>{{ country.country_name }}{% if country.country_code %} ({{ country.country_code }}){% endif %}</td>
+<td>{{ country.visites }}</td>
+<td>{{ country.visiteurs }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<p class="empty">Les pays des visiteurs apparaîtront ici au fur et à mesure que les consultations seront géolocalisées.</p>
+{% endif %}
+</section>
 </div>
 
 <script>
