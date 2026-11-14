@@ -40,6 +40,29 @@ td a{color:#173c64;text-decoration:none}td a:hover{text-decoration:underline}.em
 </section>
 
 <section class="panel">
+<h2>📊 Évolution par rapport aux 30 jours précédents</h2>
+<div class="cards">
+<div class="card">
+<span class="label">Visites — période actuelle</span>
+<strong class="value">{{ comparison.visites_actuelles }}</strong>
+</div>
+<div class="card">
+<span class="label">Visites — période précédente</span>
+<strong class="value">{{ comparison.visites_precedentes }}</strong>
+</div>
+<div class="card">
+<span class="label">Évolution des visites</span>
+<strong class="value">{{ "%+.1f"|format(comparison.visites_variation) }} %</strong>
+</div>
+<div class="card">
+<span class="label">Évolution des visiteurs identifiés</span>
+<strong class="value">{{ "%+.1f"|format(comparison.visiteurs_variation) }} %</strong>
+</div>
+</div>
+<p class="empty">Comparaison des 30 derniers jours avec les 30 jours qui les précèdent. Si la période précédente ne contient aucune visite, l'évolution est indicative.</p>
+</section>
+
+<section class="panel">
 <h2>📈 Fréquentation des 30 derniers jours</h2>
 <div class="chart-wrap"><canvas id="trafficChart"></canvas></div>
 </section>
@@ -74,7 +97,7 @@ td a{color:#173c64;text-decoration:none}td a:hover{text-decoration:underline}.em
 <tbody>
 {% for country in countries %}
 <tr>
-<td>{{ country.country_name }}{% if country.country_code %} ({{ country.country_code }}){% endif %}</td>
+<td>{% if country.country_code == 'CI' %}🇨🇮 <strong>{{ country.country_name }} — Audience locale</strong>{% else %}{{ country.country_name }}{% endif %}{% if country.country_code %} ({{ country.country_code }}){% endif %}</td>
 <td>{{ country.visites }}</td>
 <td>{{ country.visiteurs }}</td>
 </tr>
@@ -83,6 +106,10 @@ td a{color:#173c64;text-decoration:none}td a:hover{text-decoration:underline}.em
 </table>
 {% else %}
 <p class="empty">Les pays des visiteurs apparaîtront ici au fur et à mesure que les consultations seront géolocalisées.</p>
+{% endif %}
+{% if countries %}
+<h2 style="margin-top:30px">📊 Comparaison des visites par pays</h2>
+<div class="chart-wrap"><canvas id="countryChart"></canvas></div>
 {% endif %}
 </section>
 </div>
@@ -100,6 +127,27 @@ data:{labels:labels,datasets:[
 ]},
 options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
 });
+
+const countryStats = {{ countries | tojson }};
+if (countryStats.length) {
+    new Chart(document.getElementById('countryChart'), {
+        type: 'bar',
+        data: {
+            labels: countryStats.map(item => item.country_name),
+            datasets: [{
+                label: 'Visites par pays',
+                data: countryStats.map(item => item.visites),
+                backgroundColor: '#36a2eb'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+}
 </script>
 </body>
 </html>
