@@ -6,148 +6,349 @@
 <title>Statistiques | AFRICA INFOS 360</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;padding:32px 20px 60px;font-family:Arial,Helvetica,sans-serif;color:#142b46;background:#f3f5fa}
-.container{max-width:1480px;margin:0 auto}.header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:34px}
-h1{margin:0 0 8px;font-size:34px}.subtitle{margin:0;color:#52657b}.button{display:inline-block;padding:15px 22px;border-radius:9px;background:#f8b936;color:#102b49;text-decoration:none;font-weight:700}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:28px}.card,.panel{background:#fff;border-radius:16px;box-shadow:0 5px 18px rgba(20,43,70,.045)}
-.card{padding:26px;min-height:132px}.label{color:#687b91;font-weight:700;font-size:14px;text-transform:uppercase}.value{display:block;margin-top:16px;font-size:34px;font-weight:700}
-.panel{padding:28px;margin-bottom:26px}h2{margin:0 0 24px;font-size:25px}.chart-wrap{height:390px;position:relative}
-.tables-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:15px 12px;border-bottom:1px solid #e4e9f0}th{background:#f1f3f8}
-td a{color:#173c64;text-decoration:none}td a:hover{text-decoration:underline}.empty{color:#718096;padding:12px 0}
-@media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.tables-grid{grid-template-columns:1fr}}
-@media(max-width:560px){body{padding:22px 12px 40px}.cards{grid-template-columns:1fr 1fr;gap:10px}.card{padding:17px;min-height:110px}.value{font-size:27px}.panel{padding:18px 14px}.chart-wrap{height:300px}h1{font-size:28px}}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 20px 60px;font-family:Arial,Helvetica,sans-serif;color:#142b46;background:#f3f5fa}
+.container{max-width:1480px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+h1{margin:0 0 8px;font-size:34px}
+.subtitle{margin:0;color:#52657b}
+.button{display:inline-block;padding:14px 21px;border-radius:9px;background:#f8b936;color:#102b49;text-decoration:none;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:26px}
+.card,.panel{background:#fff;border-radius:16px;box-shadow:0 5px 18px rgba(20,43,70,.045)}
+.card{padding:24px;min-height:128px}
+.label{color:#687b91;font-weight:700;font-size:13px;text-transform:uppercase;line-height:1.4}
+.value{display:block;margin-top:14px;font-size:33px;font-weight:700}
+.panel{padding:27px;margin-bottom:25px}
+h2{margin:0 0 22px;font-size:24px}
+.chart-wrap{height:360px;position:relative}
+.tables-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:14px 11px;border-bottom:1px solid #e4e9f0}
+th{background:#f1f3f8}
+td a{color:#173c64;text-decoration:none}
+td a:hover{text-decoration:underline}
+.empty{color:#718096;padding:12px 0;line-height:1.6}
+.highlight{border:2px solid #16834a;background:linear-gradient(145deg,#f0fff6,#fff)}
+.highlight .value{color:#137a43}
+.badge{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:20px;background:#dff7e8;color:#126b3b;font-size:12px;font-weight:700}
+.note{font-size:13px;color:#718096;line-height:1.6;margin:14px 0 0}
+.evolution{font-size:25px}
+.positive{color:#16834a}
+.negative{color:#c0392b}
+.neutral{color:#52657b}
+@media(max-width:900px){
+.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tables-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+body{padding:22px 12px 40px}
+.cards{grid-template-columns:1fr 1fr;gap:10px}
+.card{padding:16px;min-height:108px}
+.value{font-size:26px}
+.panel{padding:18px 14px}
+.chart-wrap{height:290px}
+h1{font-size:28px}
+h2{font-size:20px}
+.evolution{font-size:19px}
+}
 </style>
 </head>
+
 <body>
 <div class="container">
+
 <header class="header">
-<div><h1>📊 Statistiques</h1><p class="subtitle">AFRICA INFOS 360 — Tableau de bord analytique</p></div>
+<div>
+<h1>📊 Statistiques</h1>
+<p class="subtitle">AFRICA INFOS 360 — Tableau de bord analytique</p>
+</div>
 <a class="button" href="{{ url_for('dashboard') }}">← Retour administration</a>
 </header>
 
 <section class="cards">
-<div class="card"><span class="label">Visites aujourd'hui</span><strong class="value">{{ today.visites }}</strong></div>
-<div class="card"><span class="label">Visiteurs identifiés aujourd'hui</span><strong class="value">{{ today.visiteurs }}</strong></div>
-<div class="card"><span class="label">Visites des 30 derniers jours</span><strong class="value">{{ last_30_days.visites }}</strong></div>
-<div class="card"><span class="label">Visiteurs identifiés — 30 jours</span><strong class="value">{{ last_30_days.visiteurs }}</strong></div>
+<div class="card">
+<span class="label">Visites aujourd'hui</span>
+<strong class="value">{{ today.visites }}</strong>
+</div>
+<div class="card">
+<span class="label">Visiteurs identifiés aujourd'hui</span>
+<strong class="value">{{ today.visiteurs }}</strong>
+</div>
+<div class="card">
+<span class="label">Visites des 30 derniers jours</span>
+<strong class="value">{{ last_30_days.visites }}</strong>
+</div>
+<div class="card">
+<span class="label">Visiteurs identifiés — 30 jours</span>
+<strong class="value">{{ last_30_days.visiteurs }}</strong>
+</div>
 </section>
 
 <section class="cards">
-<div class="card"><span class="label">Visites du mois en cours</span><strong class="value">{{ month.visites }}</strong></div>
-<div class="card"><span class="label">Visiteurs identifiés ce mois</span><strong class="value">{{ month.visiteurs }}</strong></div>
-<div class="card"><span class="label">Visites totales</span><strong class="value">{{ total.visites }}</strong></div>
-<div class="card"><span class="label">Navigateurs identifiés au total</span><strong class="value">{{ total.visiteurs }}</strong></div>
+<div class="card">
+<span class="label">Visites du mois en cours</span>
+<strong class="value">{{ month.visites }}</strong>
+</div>
+<div class="card">
+<span class="label">Visiteurs identifiés ce mois</span>
+<strong class="value">{{ month.visiteurs }}</strong>
+</div>
+<div class="card">
+<span class="label">Visites totales</span>
+<strong class="value">{{ total.visites }}</strong>
+</div>
+<div class="card">
+<span class="label">Navigateurs identifiés au total</span>
+<strong class="value">{{ total.visiteurs }}</strong>
+</div>
+</section>
+
+<section class="panel">
+<h2>🇨🇮 Audience en Côte d’Ivoire — 30 derniers jours</h2>
+
+<div class="cards">
+<div class="card highlight">
+<span class="label">Part de l’audience ivoirienne</span>
+<strong class="value">{{ audience_cote_ivoire.pourcentage }} %</strong>
+<span class="badge">🇨🇮 Côte d’Ivoire</span>
+</div>
+
+<div class="card">
+<span class="label">Visiteurs identifiés en Côte d’Ivoire</span>
+<strong class="value">{{ audience_cote_ivoire.visiteurs }}</strong>
+</div>
+
+<div class="card">
+<span class="label">Visites depuis la Côte d’Ivoire</span>
+<strong class="value">{{ audience_cote_ivoire.visites }}</strong>
+</div>
+
+<div class="card">
+<span class="label">Visiteurs géolocalisés (base de calcul)</span>
+<strong class="value">{{ audience_cote_ivoire.base_geolocalisee }}</strong>
+</div>
+</div>
+
+<p class="note">
+Le pourcentage est calculé uniquement sur les visiteurs dont le pays a pu être déterminé.
+La localisation par adresse IP reste approximative et peut être influencée par un VPN ou le réseau mobile.
+</p>
 </section>
 
 <section class="panel">
 <h2>📊 Évolution par rapport aux 30 jours précédents</h2>
+
 <div class="cards">
 <div class="card">
 <span class="label">Visites — période actuelle</span>
 <strong class="value">{{ comparison.visites_actuelles }}</strong>
 </div>
+
 <div class="card">
 <span class="label">Visites — période précédente</span>
 <strong class="value">{{ comparison.visites_precedentes }}</strong>
 </div>
+
 <div class="card">
 <span class="label">Évolution des visites</span>
-<strong class="value">{{ "%+.1f"|format(comparison.visites_variation) }} %</strong>
+<strong class="value evolution {% if comparison.visites_variation is none %}positive{% elif comparison.visites_variation > 0 %}positive{% elif comparison.visites_variation < 0 %}negative{% else %}neutral{% endif %}">
+{{ comparison.visites_evolution }}
+</strong>
 </div>
+
 <div class="card">
 <span class="label">Évolution des visiteurs identifiés</span>
-<strong class="value">{{ "%+.1f"|format(comparison.visiteurs_variation) }} %</strong>
+<strong class="value evolution {% if comparison.visiteurs_variation is none %}positive{% elif comparison.visiteurs_variation > 0 %}positive{% elif comparison.visiteurs_variation < 0 %}negative{% else %}neutral{% endif %}">
+{{ comparison.visiteurs_evolution }}
+</strong>
 </div>
 </div>
-<p class="empty">Comparaison des 30 derniers jours avec les 30 jours qui les précèdent. Si la période précédente ne contient aucune visite, l'évolution est indicative.</p>
+
+<p class="note">
+Comparaison des 30 derniers jours avec les 30 jours précédents.
+Lorsqu’aucune visite n’a été enregistrée pendant la période précédente,
+le tableau affiche « Nouvelle audience » plutôt qu’un pourcentage trompeur.
+</p>
 </section>
 
 <section class="panel">
 <h2>📈 Fréquentation des 30 derniers jours</h2>
-<div class="chart-wrap"><canvas id="trafficChart"></canvas></div>
+<div class="chart-wrap">
+<canvas id="trafficChart"></canvas>
+</div>
 </section>
 
 <div class="tables-grid">
+
 <section class="panel">
 <h2>🏆 Articles les plus lus — 30 jours</h2>
+
 {% if top_articles %}
-<table><thead><tr><th>Article</th><th>Visites</th></tr></thead><tbody>
+<table>
+<thead>
+<tr><th>Article</th><th>Visites</th></tr>
+</thead>
+<tbody>
 {% for article in top_articles %}
-<tr><td><a href="{{ url_for('article', slug=article.slug) }}" target="_blank">{{ article.title }}</a></td><td>{{ article.visites }}</td></tr>
+<tr>
+<td>
+<a href="{{ url_for('article', slug=article.slug) }}" target="_blank" rel="noopener">
+{{ article.title }}
+</a>
+</td>
+<td>{{ article.visites }}</td>
+</tr>
 {% endfor %}
-</tbody></table>
-{% else %}<p class="empty">Aucune consultation d'article enregistrée sur cette période pour le moment.</p>{% endif %}
+</tbody>
+</table>
+{% else %}
+<p class="empty">Aucune consultation d’article enregistrée sur cette période pour le moment.</p>
+{% endif %}
 </section>
 
 <section class="panel">
 <h2>📄 Pages les plus consultées</h2>
+
 {% if top_pages %}
-<table><thead><tr><th>Page</th><th>Visites</th></tr></thead><tbody>
-{% for page in top_pages %}<tr><td>{{ page.path }}</td><td>{{ page.visites }}</td></tr>{% endfor %}
-</tbody></table>
-{% else %}<p class="empty">Aucune visite enregistrée pour le moment.</p>{% endif %}
+<table>
+<thead>
+<tr><th>Page</th><th>Visites</th></tr>
+</thead>
+<tbody>
+{% for page in top_pages %}
+<tr>
+<td>{{ page.path }}</td>
+<td>{{ page.visites }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<p class="empty">Aucune visite enregistrée pour le moment.</p>
+{% endif %}
 </section>
+
 </div>
 
 <section class="panel">
 <h2>🌍 Provenance des lecteurs — 30 derniers jours</h2>
+
 {% if countries %}
 <table>
-<thead><tr><th>Pays</th><th>Visites</th><th>Navigateurs identifiés</th></tr></thead>
+<thead>
+<tr>
+<th>Pays</th>
+<th>Visites</th>
+<th>Visiteurs identifiés</th>
+</tr>
+</thead>
 <tbody>
 {% for country in countries %}
 <tr>
-<td>{% if country.country_code == 'CI' %}🇨🇮 <strong>{{ country.country_name }} — Audience locale</strong>{% else %}{{ country.country_name }}{% endif %}{% if country.country_code %} ({{ country.country_code }}){% endif %}</td>
+<td>
+{% if country.country_code == 'CI' %}
+🇨🇮 <strong>{{ country.country_name }} — Audience locale</strong>
+{% else %}
+{{ country.country_name }}
+{% endif %}
+{% if country.country_code %}
+({{ country.country_code }})
+{% endif %}
+</td>
 <td>{{ country.visites }}</td>
 <td>{{ country.visiteurs }}</td>
 </tr>
 {% endfor %}
 </tbody>
 </table>
-{% else %}
-<p class="empty">Les pays des visiteurs apparaîtront ici au fur et à mesure que les consultations seront géolocalisées.</p>
-{% endif %}
-{% if countries %}
+
 <h2 style="margin-top:30px">📊 Comparaison des visites par pays</h2>
-<div class="chart-wrap"><canvas id="countryChart"></canvas></div>
+<div class="chart-wrap">
+<canvas id="countryChart"></canvas>
+</div>
+
+{% else %}
+<p class="empty">
+Les pays des visiteurs apparaîtront ici au fur et à mesure que les consultations seront géolocalisées.
+</p>
 {% endif %}
 </section>
+
 </div>
 
 <script>
 const dailyStats = {{ daily_stats | tojson }};
-const labels = dailyStats.map(item => item.jour);
-const visits = dailyStats.map(item => item.visites);
-const visitors = dailyStats.map(item => item.visiteurs);
-new Chart(document.getElementById('trafficChart'), {
-type:'line',
-data:{labels:labels,datasets:[
-{label:'Visites',data:visits,borderColor:'#36a2eb',backgroundColor:'rgba(54,162,235,.16)',tension:.3,fill:true},
-{label:'Navigateurs identifiés',data:visitors,borderColor:'#ff6384',backgroundColor:'rgba(255,99,132,.12)',tension:.3,fill:false}
-]},
-options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+const trafficCanvas = document.getElementById('trafficChart');
+
+new Chart(trafficCanvas, {
+type: 'line',
+data: {
+labels: dailyStats.map(item => item.jour),
+datasets: [
+{
+label: 'Visites',
+data: dailyStats.map(item => item.visites),
+borderColor: '#36a2eb',
+backgroundColor: 'rgba(54,162,235,.16)',
+tension: .3,
+fill: true
+},
+{
+label: 'Visiteurs identifiés',
+data: dailyStats.map(item => item.visiteurs),
+borderColor: '#ff6384',
+backgroundColor: 'rgba(255,99,132,.12)',
+tension: .3,
+fill: false
+}
+]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+interaction: {mode: 'index', intersect: false},
+scales: {
+y: {
+beginAtZero: true,
+ticks: {precision: 0}
+}
+}
+}
 });
 
 const countryStats = {{ countries | tojson }};
-if (countryStats.length) {
-    new Chart(document.getElementById('countryChart'), {
-        type: 'bar',
-        data: {
-            labels: countryStats.map(item => item.country_name),
-            datasets: [{
-                label: 'Visites par pays',
-                data: countryStats.map(item => item.visites),
-                backgroundColor: '#36a2eb'
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
-        }
-    });
+const countryCanvas = document.getElementById('countryChart');
+
+if (countryCanvas && countryStats.length) {
+new Chart(countryCanvas, {
+type: 'bar',
+data: {
+labels: countryStats.map(item => item.country_name),
+datasets: [{
+label: 'Visites par pays',
+data: countryStats.map(item => item.visites),
+backgroundColor: countryStats.map(item =>
+item.country_code === 'CI' ? '#16834a' : '#36a2eb'
+)
+}]
+},
+options: {
+indexAxis: 'y',
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: {display: false}
+},
+scales: {
+x: {
+beginAtZero: true,
+ticks: {precision: 0}
+}
+}
+}
+});
 }
 </script>
+
 </body>
 </html>
