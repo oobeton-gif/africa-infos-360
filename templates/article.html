@@ -1,6 +1,69 @@
-{% extends "base.html" %}{% block title %}{{article.title}} – Africa Infos 360{% endblock %}{% block description %}{{article.excerpt}}{% endblock %}
-{% block content %}<div class="articlewrap"><div class="breadcrumbs"><a href="{{url_for('home')}}">Accueil</a> / {{article.category}}</div><span class="tag">{{article.category}}</span><h1 class="articletitle">{{article.title}}</h1><p class="lead">{{article.excerpt}}</p><div class="byline">Par {{article.author}} · {{article.created_at[:10]}}</div>
-{% if article.image_url %}<img class="articleimage" src="{{article.image_url}}" alt="{{article.title}}">{% endif %}
-<div class="adslot"><small>ESPACE PUBLICITAIRE</small><span>Publicité</span></div>
-<div class="articlebody">{% for para in article.body.split('\\n\\n') %}<p>{{para}}</p>{% endfor %}</div>
-<div class="adslot"><small>ESPACE PUBLICITAIRE</small><span>Publicité</span></div><a class="readmore" href="{{url_for('home')}}">← Retour aux articles</a></div>{% endblock %}
+?none:::
+```html
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} – Africa Infos 360{% endblock %}
+{% block description %}{{ article.excerpt }}{% endblock %}
+
+{% block content %}
+
+<div class="articlewrap">
+
+    <div class="breadcrumbs">
+        <a href="{{ url_for('home') }}">Accueil</a> / {{ article.category }}
+    </div>
+
+    <span class="tag">{{ article.category }}</span>
+
+    <h1 class="articletitle">{{ article.title }}</h1>
+
+    <p class="lead">{{ article.excerpt }}</p>
+
+    <div class="byline">
+        Par {{ article.author }} · {{ article.created_at[:10] }}
+    </div>
+
+    {% if article.image_url %}
+        <img class="articleimage"
+             src="{{ article.image_url }}"
+             alt="{{ article.title }}">
+    {% endif %}
+
+    <!-- PUBLICITÉ 1 : APRÈS L'IMAGE -->
+    <div class="adslot">
+        <small>ESPACE PUBLICITAIRE</small>
+        <span>Votre annonce peut apparaître ici</span>
+    </div>
+
+    <div class="articlebody">
+
+        {% for para in article.body.split('\n\n') %}
+
+            <p>{{ para }}</p>
+
+            <!-- PUBLICITÉ 2 : APRÈS LE PREMIER PARAGRAPHE -->
+            {% if loop.index == 1 and not loop.last %}
+                <div class="adslot">
+                    <small>ESPACE PUBLICITAIRE</small>
+                    <span>Votre annonce peut apparaître ici</span>
+                </div>
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
+
+    <!-- PUBLICITÉ 3 : FIN DE L'ARTICLE -->
+    <div class="adslot">
+        <small>ESPACE PUBLICITAIRE</small>
+        <span>Votre annonce peut apparaître ici</span>
+    </div>
+
+    <a class="readmore" href="{{ url_for('home') }}">
+        ← Retour aux articles
+    </a>
+
+</div>
+
+{% endblock %}
+```
