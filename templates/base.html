@@ -1,18 +1,125 @@
-<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>{% block title %}Africa Infos 360 – L'information utile en Afrique{% endblock %}</title>
+
 <meta name="description" content="{% block description %}Actualités, emploi, concours, formation, business et technologie en Afrique francophone.{% endblock %}">
-<meta name="theme-color" content="#0b1f3a"><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
-<link rel="canonical" href="{{ request.url }}">
+
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0b1f3a">
+
+<link rel="canonical" href="{{ request.base_url }}">
+
+<!-- OPEN GRAPH : PARTAGE FACEBOOK ET WHATSAPP -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AFRICA INFOS 360">
+<meta property="og:title" content="{% block og_title %}Africa Infos 360 – L'information utile en Afrique{% endblock %}">
+<meta property="og:description" content="{% block og_description %}Actualités, emploi, concours, formation, business et technologie en Afrique francophone.{% endblock %}">
+<meta property="og:url" content="{{ request.base_url }}">
+
+<!-- TWITTER CARDS -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{% block twitter_title %}Africa Infos 360 – L'information utile en Afrique{% endblock %}">
+<meta name="twitter:description" content="{% block twitter_description %}Actualités, emploi, concours, formation, business et technologie en Afrique francophone.{% endblock %}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<!-- GOOGLE ADSENSE -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7477524687576012"
-     crossorigin="anonymous"></script>
-</head><body>
-<div class="topline">LE MÉDIA DES INFORMATIONS ET DES OPPORTUNITÉS EN AFRIQUE</div>
-<header class="header"><a class="brand" href="{{ url_for('home') }}"><span class="brandmark">A<span>360</span></span><span>AFRICA INFOS <b>360</b><small>L'information utile, partout en Afrique.</small></span></a>
-<form class="search" action="{{ url_for('home') }}"><input name="q" placeholder="Rechercher un article..." value="{{ request.args.get('q','') }}"><button>⌕</button></form>
+crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+<div class="topline">
+LE MÉDIA DES INFORMATIONS ET DES OPPORTUNITÉS EN AFRIQUE
+</div>
+
+<header class="header">
+
+<a class="brand" href="{{ url_for('home') }}">
+<span class="brandmark">A<span>360</span></span>
+<span>
+AFRICA INFOS <b>360</b>
+<small>L'information utile, partout en Afrique.</small>
+</span>
+</a>
+
+<form class="search" action="{{ url_for('home') }}">
+<input name="q"
+placeholder="Rechercher un article..."
+value="{{ request.args.get('q','') }}">
+<button>⌕</button>
+</form>
+
 </header>
-<nav class="nav"><div class="navinner"><a href="{{ url_for('home') }}">Accueil</a>{% for c in categories %}<a href="{{ url_for('category_page',category=c) }}">{{ c }}</a>{% endfor %}</div></nav>
-<main>{% with msgs=get_flashed_messages() %}{% if msgs %}<div class="flash">{% for m in msgs %}{{m}}{% endfor %}</div>{% endif %}{% endwith %}
-{% block content %}{% endblock %}</main>
-<footer><div class="footergrid"><div><div class="footerbrand">AFRICA INFOS 360</div><p>Comprendre l'actualité, découvrir les opportunités et avancer grâce à une information utile.</p></div><div><b>Explorer</b><a href="{{url_for('home')}}">Accueil</a><a href="{{url_for('about')}}">À propos</a><a href="{{url_for('contact')}}">Contact</a></div><div><b>Informations</b><a href="{{url_for('privacy')}}">Confidentialité</a><a href="{{url_for('legal')}}">Mentions légales</a><a href="{{url_for('login')}}">Administration</a></div></div><div class="copyright">© {{year}} Africa Infos 360. Tous droits réservés.</div></footer>
-</body></html>
+
+<nav class="nav">
+<div class="navinner">
+
+<a href="{{ url_for('home') }}">Accueil</a>
+
+{% for c in categories %}
+<a href="{{ url_for('category_page',category=c) }}">{{ c }}</a>
+{% endfor %}
+
+</div>
+</nav>
+
+<main>
+
+{% with msgs = get_flashed_messages() %}
+{% if msgs %}
+<div class="flash">
+{% for m in msgs %}
+{{ m }}
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+</main>
+
+<footer>
+
+<div class="footergrid">
+
+<div>
+<div class="footerbrand">AFRICA INFOS 360</div>
+<p>
+Comprendre l'actualité, découvrir les opportunités
+et avancer grâce à une information utile.
+</p>
+</div>
+
+<div>
+<b>Explorer</b>
+<a href="{{ url_for('home') }}">Accueil</a>
+<a href="{{ url_for('about') }}">À propos</a>
+<a href="{{ url_for('contact') }}">Contact</a>
+</div>
+
+<div>
+<b>Informations</b>
+<a href="{{ url_for('privacy') }}">Confidentialité</a>
+<a href="{{ url_for('legal') }}">Mentions légales</a>
+<a href="{{ url_for('login') }}">Administration</a>
+</div>
+
+</div>
+
+<div class="copyright">
+© {{ year }} Africa Infos 360. Tous droits réservés.
+</div>
+
+</footer>
+
+</body>
+</html>
