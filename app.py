@@ -456,7 +456,7 @@ def statistiques():
             LIMIT 10
         """).fetchall()
 
-        # PROVENANCE GEOGRAPHIQUE (pays connus uniquement)
+        # PROVENANCE GEOGRAPHIQUE : PAYS CONNUS SUR LES 30 DERNIERS JOURS
         countries = con.execute("""
             SELECT country_name, country_code, COUNT(*) AS visites,
                    COUNT(DISTINCT visitor_id) AS visiteurs
@@ -469,6 +469,25 @@ def statistiques():
                      visites DESC
             LIMIT 10
         """).fetchall()
+
+        # AUDIENCE GEOLOCALISEE : BASE DE CALCUL DU POURCENTAGE
+        known_geo_audience = con.execute("""
+            SELECT COUNT(DISTINCT visitor_id) AS visiteurs
+            FROM site_visits
+            WHERE country_code IS NOT NULL
+              AND country_name IS NOT NULL
+              AND country_name <> 'Non déterminé'
+              AND visited_at >= CURRENT_DATE - INTERVAL '29 days'
+        """).fetchone()["visiteurs"] or 0
+
+        # VISITEURS IDENTIFIES COMME ETANT EN COTE D'IVOIRE
+        cote_ivoire = con.execute("""
+            SELECT COUNT(DISTINCT visitor_id) AS visiteurs,
+                   COUNT(*) AS visites
+            FROM site_visits
+            WHERE country_code = 'CI'
+              AND visited_at >= CURRENT_DATE - INTERVAL '29 days'
+        """).fetchone()
 
         # COMPARAISON DES 30 DERNIERS JOURS AVEC LES 30 JOURS PRECEDENTS
         previous_30_days = con.execute("""
@@ -487,19 +506,59 @@ def statistiques():
         """).fetchone()
 
     def variation(current, previous):
+        """Retourne None si aucune base de comparaison n'existe."""
         current = int(current or 0)
         previous = int(previous or 0)
         if previous == 0:
-            return 100 if current > 0 else 0
+            return None if current > 0 else 0
         return round(((current - previous) / previous) * 100, 1)
+
+    def evolution_label(current, previous):
+        current = int(current or 0)
+        previous = int(previous or 0)
+        if previous == 0 and current > 0:
+            return "Nouvelle audience"
+        if previous == 0 and current == 0:
+            return "Stable"
+        value = variation(current, previous)
+        if value > 0:
+            return f"+{value}%"
+        return f"{value}%"
+
+    cote_ivoire_visiteurs = int(cote_ivoire["visiteurs"] or 0)
+    cote_ivoire_visites = int(cote_ivoire["visites"] or 0)
+    pourcentage_cote_ivoire = (
+        round((cote_ivoire_visiteurs / known_geo_audience) * 100, 1)
+        if known_geo_audience > 0 else 0
+    )
+
+    audience_cote_ivoire = {
+        "visiteurs": cote_ivoire_visiteurs,
+        "visites": cote_ivoire_visites,
+        "pourcentage": pourcentage_cote_ivoire,
+        "base_geolocalisee": int(known_geo_audience),
+    }
+
+    comparaison_visites = variation(
+        current_30_days["visites"], previous_30_days["visites"]
+    )
+    comparaison_visiteurs = variation(
+        current_30_days["visiteurs"], previous_30_days["visiteurs"]
+    )
 
     comparison = {
         "visites_actuelles": current_30_days["visites"],
         "visites_precedentes": previous_30_days["visites"],
-        "visites_variation": variation(current_30_days["visites"], previous_30_days["visites"]),
+        "visites_variation": comparaison_visites,
+        "visites_evolution": evolution_label(
+            current_30_days["visites"], previous_30_days["visites"]
+        ),
         "visiteurs_actuels": current_30_days["visiteurs"],
         "visiteurs_precedents": previous_30_days["visiteurs"],
-        "visiteurs_variation": variation(current_30_days["visiteurs"], previous_30_days["visiteurs"])
+        "visiteurs_variation": comparaison_visiteurs,
+        "visiteurs_evolution": evolution_label(
+            current_30_days["visiteurs"], previous_30_days["visiteurs"]
+        ),
     }
 
     return render_template(
@@ -512,7 +571,8 @@ def statistiques():
         daily_stats=daily_stats,
         top_articles=top_articles,
         countries=countries,
-        comparison=comparison
+        comparison=comparison,
+        audience_cote_ivoire=audience_cote_ivoire,
     )
 
 
