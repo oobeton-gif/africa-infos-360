@@ -39,4 +39,44 @@
 <p>Cette politique peut être mise à jour afin de tenir compte de l'évolution du site, de ses services ou des obligations applicables.</p>
 
 <p><strong>Dernière mise à jour : novembre 2026.</strong></p>
-{% else %}<p>Éditeur du site : à compléter avec le nom légal de la personne ou de l'entreprise éditrice.</p><p>Adresse de contact : à compléter.</p><p>Directeur de publication : à compléter.</p><p>Hébergeur : à compléter après le choix du prestataire d'hébergement.</p><p>Les contenus publiés sont destinés à informer. Ils ne remplacent pas les conseils d'un professionnel ni les communications des autorités compétentes.</p>{% endif %}</section>{% endblock %}
+{% else %}
+<p><strong>Dernière mise à jour : novembre 2026</strong></p>
+
+<h2>1. Éditeur du site</h2>
+<p>Le site AFRICA INFOS 360 est un média numérique indépendant consacré à l'actualité, aux opportunités professionnelles, à la formation, au business et à la technologie en Afrique francophone.</p>
+
+<p><strong>Nom commercial :</strong> AFRICA INFOS 360</p>
+<p><strong>Statut déclaré :</strong> éditeur personne physique.</p>
+<p><strong>Nom et prénoms de l'éditeur :</strong> à renseigner.</p>
+
+<h2>2. Directeur de publication</h2>
+<p>Nom et prénoms du directeur de publication : à renseigner.</p>
+
+<h2>3. Hébergement du site</h2>
+<p>Le site AFRICA INFOS 360 est hébergé par :</p>
+<p><strong>Render Services, Inc.</strong></p>
+<p>Site officiel de l'hébergeur :
+<a href="https://render.com" target="_blank" rel="noopener noreferrer">https://render.com</a></p>
+
+<h2>4. Objet du site</h2>
+<p>AFRICA INFOS 360 diffuse des actualités, des informations sur l'emploi, les concours, les formations, le business, la finance, la technologie et des conseils pratiques destinés principalement au public africain francophone.</p>
+
+<h2>5. Propriété intellectuelle</h2>
+<p>Les textes, éléments graphiques, logos et autres contenus originaux publiés sur AFRICA INFOS 360 sont protégés par les règles applicables en matière de propriété intellectuelle.</p>
+<p>Toute reproduction ou exploitation non autorisée est interdite, sauf autorisation préalable ou exception prévue par la loi.</p>
+
+<h2>6. Responsabilité éditoriale</h2>
+<p>AFRICA INFOS 360 s'efforce de publier des informations fiables et régulièrement actualisées. Toutefois, le site ne garantit pas l'exactitude absolue ni l'exhaustivité de toutes les informations diffusées.</p>
+<p>Les visiteurs sont invités à vérifier les informations importantes auprès des organismes et sources officiels concernés.</p>
+
+<h2>7. Liens externes</h2>
+<p>Le site peut contenir des liens vers des plateformes ou sites externes. AFRICA INFOS 360 ne saurait être tenu responsable de leur contenu, de leur fonctionnement ou de leurs pratiques de confidentialité.</p>
+
+<h2>8. Publicité</h2>
+<p>Le site peut accueillir des annonces publicitaires et des contenus sponsorisés, notamment par l'intermédiaire de partenaires publicitaires tels que Google AdSense.</p>
+
+<h2>9. Données personnelles</h2>
+<p>Les modalités de collecte et de traitement des données personnelles sont présentées dans notre <a href="{{ url_for('privacy') }}">politique de confidentialité</a>.</p>
+
+<h2>10. Contact</h2>
+<p>Pour toute question concernant le site, son fonctionnement ou ses publications, les visiteurs peuvent utiliser la page <a href="{{ url_for('contact') }}">Contact</a>.</p></section>{% endblock %}
